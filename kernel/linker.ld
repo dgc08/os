@@ -2,16 +2,15 @@
 /* OUTPUT_FORMAT(elf64-x86-64) */
 
 /* We want the symbol kmain to be our entry point */
-ENTRY(kmain)
+ENTRY(kboot32)
 
-/* /\* Program headers are optional for Multiboot 2 but can be included *\/ */
-/* PHDRS */
-/* { */
-/*     multiboot_header PT_LOAD FLAGS(0x05); /\* Read/Execute *\/ */
-/*     text PT_LOAD FLAGS(0x05);             /\* Read/Execute *\/ */
-/*     rodata PT_LOAD FLAGS(0x04);           /\* Read-only *\/ */
-/*     data PT_LOAD FLAGS(0x06);             /\* Read/Write *\/ */
-/* } */
+PHDRS
+{
+    limine_requests PT_LOAD;
+    text PT_LOAD;
+    rodata PT_LOAD;
+    data PT_LOAD;
+}
 
 /* Define sections and layout */
 SECTIONS
@@ -25,25 +24,25 @@ SECTIONS
         KEEP(*(.multiboot_header))
     }
 
-    /* Code section (.text) */
     . = ALIGN(CONSTANT(MAXPAGESIZE));
+
     .text : {
         *(.text .text.*)
-    }
+    } :text
 
     /* Move to the next memory page for .rodata */
     . = ALIGN(CONSTANT(MAXPAGESIZE));
 
     .rodata : {
         *(.rodata .rodata.*)
-    }
+    } :rodata
 
     /* Move to the next memory page for .data */
     . = ALIGN(CONSTANT(MAXPAGESIZE));
 
     .data : {
         *(.data .data.*)
-    }
+    } :data
 
     /* NOTE: .bss needs to be the last thing mapped to :data, otherwise lots of */
     /* unnecessary zeros will be written to the binary. */
@@ -52,7 +51,7 @@ SECTIONS
     .bss : {
         *(.bss .bss.*)
         *(COMMON)
-    }
+    } :data
 
     /* Discard .note.* and .eh_frame* since they may cause issues on some hosts. */
     /DISCARD/ : {

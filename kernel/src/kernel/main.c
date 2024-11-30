@@ -1,11 +1,24 @@
-#include "../lib.h"
+#include <lib.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#define WHITE 0x07
+
+static volatile char* const video = (char*) 0xb8000;
+static volatile size_t cursor_pos = 0;
+
+void putc (char c, uint8_t color) {
+    video[cursor_pos++] = c;
+    video[cursor_pos++] = color;
+}
+
+void puts (const char* s, uint8_t color) {
+    while (*s != 0) {
+        putc(*s++, color);
+    }
+}
 
 void kmain(void) {
-    asm volatile (
-        "mov dword ptr [0xb8000], 0x2f4b2f4f\n"
-        "mov dword ptr [0xb8004], 0x2f702f70\n"
-    );
-    while (1) {
-        hcf();
-    }
+    puts("Hello, World!", WHITE);
+    hcf();
 }
