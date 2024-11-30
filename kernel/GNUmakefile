@@ -48,6 +48,7 @@ endif
 
 # Internal C flags that should not be changed by the user.
 override CFLAGS += \
+	-masm=intel \
     -Wall \
     -Wextra \
     -std=gnu11 \
@@ -88,7 +89,9 @@ override LDFLAGS += \
     -static \
     -z max-page-size=0x1000 \
     -gc-sections \
-    -T linker.ld
+	-z noexecstack \
+    -T linker.ld \
+	-n
 
 # Use "find" to glob all *.c, *.S, and *.asm files in the tree and obtain the
 # object and header dependency file names.
