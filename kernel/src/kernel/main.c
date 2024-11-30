@@ -20,5 +20,7 @@ void puts (const char* s, uint8_t color) {
 
 void kmain(void) {
     puts("Hello, World!", WHITE);
+    dbbreak();
+    puts(" Hallo, Welt!", WHITE);
     hcf();
 }

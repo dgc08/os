@@ -28,6 +28,19 @@ run: $(IMAGE_NAME).iso
 		-boot d \
 		$(QEMUFLAGS)
 
+.PHONY: con
+con:
+	gdb -ex "target remote localhost:1234" -ex "break kernel/src/lib/utils.c:5" kernel/bin/kernel
+
+.PHONY: debug
+debug: $(IMAGE_NAME).iso
+	qemu-system-x86_64 \
+		-M q35 \
+		-cdrom $(IMAGE_NAME).iso \
+		-boot d \
+		-s -S \
+		$(QEMUFLAGS)
+
 .PHONY: run-uefi
 run-uefi: ovmf/ovmf-code-x86_64.fd $(IMAGE_NAME).iso
 	qemu-system-x86_64 \

@@ -6,7 +6,7 @@ ENTRY(kboot32)
 
 PHDRS
 {
-    limine_requests PT_LOAD;
+    boot PT_LOAD;
     text PT_LOAD;
     rodata PT_LOAD;
     data PT_LOAD;
@@ -22,7 +22,7 @@ SECTIONS
         /* ensure that the multiboot header is at the beginning */
         *(.multiboot_header)
         KEEP(*(.multiboot_header))
-    }
+    } :boot
 
     . = ALIGN(CONSTANT(MAXPAGESIZE));
 
