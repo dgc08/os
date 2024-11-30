@@ -48,8 +48,7 @@ endif
 
 # Internal C flags that should not be changed by the user.
 override CFLAGS += \
-	-masm=intel \
-    -Wall \
+	-Wall \
     -Wextra \
     -std=gnu11 \
     -nostdinc \

@@ -10,12 +10,8 @@ void *memset(void *s, int c, size_t n);
 void *memmove(void *dest, const void *src, size_t n);
 int memcmp(const void *s1, const void *s2, size_t n);
 
-static inline void hcf(void) {
-    for (;;) {
-        asm ("hlt");
-    }
-}
-
 void dbbreak(void);
+
+char* itoa(int value, char* str, int base);
 
 #endif // LIB_H_
