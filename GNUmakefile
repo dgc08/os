@@ -8,7 +8,7 @@ QEMUFLAGS := -m 2G
 override IMAGE_NAME := template
 
 # Toolchain for building the 'limine' executable for the host.
-HOST_CC := cc
+HOST_CC := gcc
 HOST_CFLAGS := -g -O2 -pipe
 HOST_CPPFLAGS :=
 HOST_LDFLAGS :=
