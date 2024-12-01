@@ -2,45 +2,35 @@
 #include <iolib.h>
 
 static volatile char* const video = (char*) VGA_VIDEO_ADDRESS;
-static volatile size_t cursor_pos = 0;
 
-static uint8_t color = 0x07;
-
-void set_cursor(int offset) {
-    offset /= 2;
+void VGA_set_cursor (int offset) {
     outb(VGA_CTRL_REGISTER, VGA_OFFSET_HIGH);
-    outb(VGA_DATA_REGISTER, (unsigned char) (offset >> 8));
+    outb(VGA_DATA_REGISTER, (uint8_t) (offset >> 8));
     outb(VGA_CTRL_REGISTER, VGA_OFFSET_LOW);
-    outb(VGA_DATA_REGISTER, (unsigned char) (offset & 0xff));
+    outb(VGA_DATA_REGISTER, (uint8_t) (offset & 0xff));
 }
 
-int getVGACursor() {
+int VGA_get_cursor () {
     outb(VGA_CTRL_REGISTER, VGA_OFFSET_HIGH);
     int offset = inb(VGA_DATA_REGISTER) << 8;
     outb(VGA_CTRL_REGISTER, VGA_OFFSET_LOW);
     offset += inb(VGA_DATA_REGISTER);
-    return offset * 2;
+    return offset;
 }
 
-void putc(char c) {
-    if (c == '\n') {
-        cursor_pos = (cursor_pos / VGA_COLS+1) * VGA_COLS;
-        if (cursor_pos >= VGA_ROWS * VGA_COLS * 2)
-            cursor_pos = 0;
-        set_cursor(cursor_pos);
-        return;
+void VGA_put_char(char c, uint8_t color, uint32_t pos) {
+    pos *= 2;
+    video[pos] = c;
+    video[pos+1] = color;
+}
+
+void VGA_clear_screen () {
+    for (int i = 0; i < (VGA_COLS * VGA_ROWS); ++i) {
+        VGA_put_char(' ', VGA_WHITE, i);
     }
-    video[cursor_pos++] = c;
-    video[cursor_pos++] = color;
-    set_cursor(cursor_pos);
+    VGA_set_cursor(0);
 }
 
-void puts (const char* s) {
-    while (*s != 0) {
-        putc(*s++);
-    }
-}
-
-void set_color_byte(const uint8_t new_color) {
-    color = new_color;
+uint8_t inline gen_color (uint8_t fg, uint8_t bg) {
+    return fg | bg << 4;
 }

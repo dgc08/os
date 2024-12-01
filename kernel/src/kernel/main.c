@@ -2,32 +2,38 @@
 #include <stdint.h>
 
 #include <lib.h>
-#include <drivers/VGA_text.h>
+#include <drivers/tty.h>
 
-static inline void hcf(void) {
+static inline void hcf (void) {
     while (1) {
         asm ("hlt");
     }
 }
+
 void acpi_poweroff(void);
-void poweroff(void) {
+void poweroff (void) {
     acpi_poweroff();
     puts("Poweroff failed\n");
     hcf();
 }
 
-void kmain(void) {
+void kmain (void) {
     char buf [33];
-    itoa(35+34, buf, 16);
-    puts(buf);
-    puts("\n");
-    puts("Hello, World!\n");
-    puts("Hallo, Welt!\n");
-    puts("Hallo, Welt!\n");
-    puts("Hallo, Welt!\n");
-    puts("Hallo, Welt!\n");
-    puts("Hallo, Welt!\n");
-    puts("Hallo, Welt!\n");
-    puts("Hallo, Welt!\n");
+    buf[0] = ' ';
+    for (int i = 0; i < 25; i++) {
+        putc('A'+i);
+        buf[0] = ' ';
+
+        Vector2 pos = tty_get_cursor_vector();
+
+        itoa(pos.y, buf+1, 10);
+        puts(buf);
+        putc(':');
+        itoa(pos.x, buf, 10);
+        puts(buf);
+        putc('\n');
+    }
+    //puts("Guten morgen.sdfhjdgsfjhdsgfjdsgggfdsjgfggsddsfdsfdsfdsgfssjsdhfgsdjhfgsdjgfdjshgfdjh\nguten tag");
+
     hcf();
 }
