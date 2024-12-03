@@ -5,6 +5,8 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#include <stdlib.h>
+
 typedef struct {
     int x;
     int y;
@@ -17,8 +19,7 @@ int memcmp(const void *s1, const void *s2, size_t n);
 
 void dbbreak(void);
 
-char* itoa(int value, char* str, int base);
-
+__attribute__((noreturn))
 void kernel_panic(int code, char* msg);
 
 #endif // LIB_H_

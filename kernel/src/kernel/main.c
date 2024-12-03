@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #include <lib.h>
 #include <drivers/tty.h>
@@ -12,8 +13,19 @@ void poweroff (void) {
     hcf();
 }
 
+__attribute__((optimize("O0")))
+void foo(const char* str)
+{
+    char buffer[16];
+    strcpy(buffer, str);
+    dbbreak();
+}
 
 void kmain (void) {
+    dbbreak();
+
+    foo("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+
     char buf [33];
     buf[0] = ' ';
     for (int i = 0; i < 26; i++) {

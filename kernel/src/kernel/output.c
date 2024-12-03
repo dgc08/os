@@ -4,6 +4,7 @@
 
 char iota_buf[33];
 
+__attribute__((noreturn))
 void kernel_panic (int code, char* msg) {
     tty_set_cursor_scalar(0);
     puts("\n**********************************KERNEL PANIC**********************************\n");

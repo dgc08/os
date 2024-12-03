@@ -1,1 +1,5 @@
 -Isrc
+-isystem freestnd-c-hdrs-0bsd
+-ffreestanding
+-Isrc/libc/include
+-nostdlib

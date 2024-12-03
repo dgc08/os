@@ -5,7 +5,7 @@ MAKEFLAGS += -rR
 # Default user QEMU flags. These are appended to the QEMU command calls.
 QEMUFLAGS := -m 2G
 
-override IMAGE_NAME := os
+override IMAGE_NAME := myos
 
 # Toolchain for building the 'limine' executable for the host.
 HOST_CC := gcc

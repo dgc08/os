@@ -19,7 +19,7 @@ AR := ar
 LD := ld
 
 # User controllable C flags.
-CFLAGS := -g -O2 -pipe
+CFLAGS := -g -O2 -pipe -Wundef -Werror
 
 # User controllable C preprocessor flags. We set none by default.
 CPPFLAGS :=
@@ -53,9 +53,7 @@ override CFLAGS += \
     -std=gnu11 \
     -nostdinc \
     -ffreestanding \
-    -fno-stack-protector \
-    -fno-stack-check \
-    -fno-lto \
+	-fstack-protector-all \
     -fno-PIC \
     -ffunction-sections \
     -fdata-sections \
@@ -67,10 +65,14 @@ override CFLAGS += \
     -mno-sse2 \
     -mno-red-zone \
     -mcmodel=kernel
+    # -fno-stack-protector \
+    # -fno-stack-check \
+    # -fno-lto \
 
 # Internal C preprocessor flags that should not be changed by the user.
 override CPPFLAGS := \
-    -I src \
+    -Isrc \
+    -Isrc/libc/include \
     -isystem freestnd-c-hdrs-0bsd \
     $(CPPFLAGS) \
     -MMD \
@@ -140,12 +142,12 @@ obj/%.asm.o: src/%.asm GNUmakefile
 # Remove object files and the final executable.
 .PHONY: clean
 clean:
-	rm -rf bin obj cc-runtime-x86_64
+	rm -rf bin obj
 
 # Remove everything built and generated including downloaded dependencies.
 .PHONY: distclean
 distclean: clean
-	rm -rf freestnd-c-hdrs-0bsd cc-runtime
+	rm -rf freestnd-c-hdrs-0bsd cc-runtime-x86_64 cc-runtime
 
 # Install the final built executable to its final on-root location.
 .PHONY: install

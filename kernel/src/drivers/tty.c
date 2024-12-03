@@ -30,6 +30,11 @@ void puts (const char* s) {
     }
 }
 
+void tty_write(const char* data, size_t size) {
+    for (size_t i = 0; i < size; i++)
+        putc(data[i]);
+}
+
 void tty_set_color_byte (uint8_t new_color) {
     color = new_color;
 }
@@ -63,8 +68,6 @@ void tty_scroll_down (int amount) {
             dbbreak();
             VGA_put_char(c.c, c.color, pos-VGA_COLS);
         }
-        /* cursor_pos -= VGA_COLS; */
-        /* VGA_set_cursor(cursor_pos); */
         tty_set_cursor_vector((Vector2) {.x = 0, .y = VGA_ROWS-1});
         for (int i = 0; i < VGA_COLS; i++)
             putc(' ');

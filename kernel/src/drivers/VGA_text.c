@@ -41,6 +41,6 @@ void VGA_clear_screen () {
     VGA_set_cursor(0);
 }
 
-uint8_t inline gen_color (uint8_t fg, uint8_t bg) {
+inline uint8_t gen_color (uint8_t fg, uint8_t bg) {
     return fg | bg << 4;
 }
