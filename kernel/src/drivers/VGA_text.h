@@ -29,8 +29,16 @@
 #define VGA_ROWS 25
 #define VGA_COLS 80
 
+typedef struct {
+    char c;
+    uint8_t color;
+} VGA_character;
+
 void VGA_clear_screen();
+
 void VGA_put_char(char c, uint8_t color, uint32_t pos);
+VGA_character VGA_get_char(uint32_t pos);
+
 
 void VGA_set_cursor(int offset);
 int VGA_get_cursor();

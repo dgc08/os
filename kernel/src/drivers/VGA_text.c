@@ -1,4 +1,5 @@
 #include "VGA_text.h"
+#include "lib.h"
 #include <iolib.h>
 
 static volatile char* const video = (char*) VGA_VIDEO_ADDRESS;
@@ -22,6 +23,15 @@ void VGA_put_char(char c, uint8_t color, uint32_t pos) {
     pos *= 2;
     video[pos] = c;
     video[pos+1] = color;
+}
+
+VGA_character VGA_get_char(uint32_t pos) {
+    pos *= 2;
+    VGA_character ret;
+    ret.c = video[pos];
+    ret.color = video[pos+1];
+
+    return ret;
 }
 
 void VGA_clear_screen () {

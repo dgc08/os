@@ -3,24 +3,20 @@
 
 #include <lib.h>
 #include <drivers/tty.h>
+#include <iolib.h>
 
-static inline void hcf (void) {
-    while (1) {
-        asm ("hlt");
-    }
-}
-
-void acpi_poweroff(void);
+void acpi_poweroff_qemu(void);
 void poweroff (void) {
-    acpi_poweroff();
-    puts("Poweroff failed\n");
+    acpi_poweroff_qemu();
+    puts("Poweroff failed, you are probably not using QEMU\n");
     hcf();
 }
+
 
 void kmain (void) {
     char buf [33];
     buf[0] = ' ';
-    for (int i = 0; i < 25; i++) {
+    for (int i = 0; i < 26; i++) {
         putc('A'+i);
         buf[0] = ' ';
 
@@ -33,7 +29,7 @@ void kmain (void) {
         puts(buf);
         putc('\n');
     }
-    //puts("Guten morgen.sdfhjdgsfjhdsgfjdsgggfdsjgfggsddsfdsfdsfdsgfssjsdhfgsdjhfgsdjgfdjshgfdjh\nguten tag");
+    //puts("lol");
 
     hcf();
 }

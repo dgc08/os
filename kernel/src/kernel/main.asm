@@ -1,8 +1,8 @@
-global acpi_poweroff
+global acpi_poweroff_qemu
     
 section .text
 bits 64
-acpi_poweroff:
+acpi_poweroff_qemu:
     ; Attempt ACPI shutdown via QEMU's ACPI port
     mov dx, 0x604    ; ACPI shutdown port (QEMU-specific)
     mov ax, 0x2000   ; Value to signal power off

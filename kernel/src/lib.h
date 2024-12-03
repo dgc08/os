@@ -19,4 +19,6 @@ void dbbreak(void);
 
 char* itoa(int value, char* str, int base);
 
+void kernel_panic(int code, char* msg);
+
 #endif // LIB_H_

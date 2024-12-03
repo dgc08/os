@@ -9,4 +9,10 @@ static inline void hlt_pause (void) {
     asm ("hlt");
 }
 
+static inline void hcf (void) {
+    while (1) {
+        hlt_pause();
+    }
+}
+
 #endif // IOLIB_H_

@@ -5,7 +5,7 @@ MAKEFLAGS += -rR
 # Default user QEMU flags. These are appended to the QEMU command calls.
 QEMUFLAGS := -m 2G
 
-override IMAGE_NAME := template
+override IMAGE_NAME := os
 
 # Toolchain for building the 'limine' executable for the host.
 HOST_CC := gcc
@@ -30,7 +30,7 @@ run: $(IMAGE_NAME).iso
 
 .PHONY: con
 con:
-	gdb -ex "target remote localhost:1234" -ex "break kernel/src/lib/utils.c:5" kernel/bin/kernel
+	gdb -ex "target remote localhost:1234" -ex "break kernel/src/lib/utils.c:4" kernel/bin/kernel
 
 .PHONY: debug
 debug: $(IMAGE_NAME).iso
