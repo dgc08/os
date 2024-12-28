@@ -2,6 +2,7 @@
 #include <lib.h>
 #include <iolib.h>
 #include <drivers/VGA_text.h>
+#include <drivers/keyboard_hardware.h>
 
 static volatile int cursor_pos = 0;
 
@@ -65,7 +66,6 @@ void tty_scroll_down (int amount) {
     for ( ; amount != 0; amount--) {
         for (int pos = VGA_COLS; pos < (VGA_ROWS) * VGA_COLS; pos++) {
             VGA_character c = VGA_get_char(pos);
-            dbbreak();
             VGA_put_char(c.c, c.color, pos-VGA_COLS);
         }
         tty_set_cursor_vector((Vector2) {.x = 0, .y = VGA_ROWS-1});
@@ -74,4 +74,17 @@ void tty_scroll_down (int amount) {
         tty_set_cursor_vector((Vector2) {.x = 0, .y = VGA_ROWS-1});
     }
     //hcf();
+}
+
+//INPUT
+char getch () {
+    static char old_ch = 0;
+    char ch = get_ascii_char(get_keycode());
+    if (ch == old_ch) {
+        return 0;
+    }
+    else {
+        old_ch = ch;
+        return ch;
+    }
 }

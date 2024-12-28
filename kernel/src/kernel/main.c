@@ -13,18 +13,16 @@ void poweroff (void) {
     hcf();
 }
 
-__attribute__((optimize("O0")))
-void foo(const char* str)
-{
-    char buffer[16];
-    strcpy(buffer, str);
-    dbbreak();
-}
 
 void kmain (void) {
-    dbbreak();
-
-    foo("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    //dbbreak();
+    while (1) {
+        char c = getch();
+        if (c)
+            putc(c);
+        //else
+            //putc('.');
+    }
 
     char buf [33];
     buf[0] = ' ';
@@ -42,6 +40,6 @@ void kmain (void) {
         putc('\n');
     }
     //puts("lol");
-
+    poweroff();
     hcf();
 }

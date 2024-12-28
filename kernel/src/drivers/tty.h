@@ -18,4 +18,6 @@ void tty_set_cursor_vector(Vector2 new_cursor);
 
 void tty_scroll_down(int amount);
 
+char getch();
+
 #endif // TTY_H_
