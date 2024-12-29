@@ -6,8 +6,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
-void putc(char c);
-void puts(const char* s);
+int putc(char c);
+int puts(const char* s);
 void tty_set_color_byte(const uint8_t new_color);
 
 int tty_get_cursor_scalar();

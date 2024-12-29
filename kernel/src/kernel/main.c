@@ -2,9 +2,15 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <lib.h>
-#include <drivers/tty.h>
+#include <stdio.h>
 #include <iolib.h>
+
+#include <drivers/tty.h>
+#include "drivers/keyboard_hardware.h"
+#include "drivers/keyboard_layouts.h"
+
+#include <lib.h>
+#include <lib/queue.h>
 
 void acpi_poweroff_qemu(void);
 void poweroff (void) {
@@ -16,30 +22,39 @@ void poweroff (void) {
 
 void kmain (void) {
     //dbbreak();
+
+    set_keyboard_layout("de");
+
+    while(1) {
+        putc(getch());
+        get_keycode();
+    }
+
     while (1) {
-        char c = getch();
-        if (c)
-            putc(c);
-        //else
-            //putc('.');
+        puts("here: ");
+        for (uint8_t i=0; i < 128; i++) {
+            get_keycode();
+            if (check_key(i)) {
+               printf("%d ", i);
+            }
+        }
+        puts("\n");
     }
 
-    char buf [33];
-    buf[0] = ' ';
-    for (int i = 0; i < 26; i++) {
-        putc('A'+i);
-        buf[0] = ' ';
+    /* char buf [33]; */
+    /* buf[0] = ' '; */
+    /* for (int i = 0; i < 26; i++) { */
+    /*     putc('A'+i); */
+    /*     buf[0] = ' '; */
 
-        Vector2 pos = tty_get_cursor_vector();
+    /*     Vector2 pos = tty_get_cursor_vector(); */
 
-        itoa(pos.y, buf+1, 10);
-        puts(buf);
-        putc(':');
-        itoa(pos.x, buf, 10);
-        puts(buf);
-        putc('\n');
-    }
-    //puts("lol");
-    poweroff();
+    /*     itoa(pos.y, buf+1, 10); */
+    /*     puts(buf); */
+    /*     putc(':'); */
+    /*     itoa(pos.x, buf, 10); */
+    /*     puts(buf); */
+    /*     putc('\n'); */
+    /* } */
     hcf();
 }

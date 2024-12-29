@@ -9,7 +9,7 @@
 static bool print (const char* data, size_t length) {
 	const unsigned char* bytes = (const unsigned char*) data;
 	for (size_t i = 0; i < length; i++)
-		if (putchar(bytes[i]) == EOF)
+		if (putc(bytes[i]) == EOF)
 			return false;
 	return true;
 }
@@ -62,6 +62,20 @@ int printf (const char* restrict format, ...) {
 			}
 			if (!print(str, len))
 				return -1;
+			written += len;
+		} else if (*format == 'd') {
+			format++;
+			int value = va_arg(parameters, int); // Retrieve the next argument as an integer
+			char buffer[12]; // Enough space to hold the largest 32-bit integer value as a string (+null terminator)
+			itoa(value, buffer, 10); // Convert the integer to a decimal string
+			size_t len = strlen(buffer); // Calculate the string length
+			if (maxrem < len) {
+				// TODO: Set errno to EOVERFLOW.
+				return -1;
+			}
+			if (!print(buffer, len)) {
+				return -1;
+			}
 			written += len;
 		} else {
 			format = format_begun_at;

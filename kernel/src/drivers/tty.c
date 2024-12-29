@@ -1,34 +1,53 @@
-#include "tty.h"
+#include <stdint.h>
+
+#include "lib/queue.h"
 #include <lib.h>
 #include <iolib.h>
+
 #include <drivers/VGA_text.h>
 #include <drivers/keyboard_hardware.h>
+
+#include "tty.h"
+#include "keyboard_layouts.h"
 
 static volatile int cursor_pos = 0;
 
 static uint8_t color = VGA_LIGHT_GRAY | VGA_BLACK << 4;
 
-void putc (char c) {
+int putc (char c) {
+    int code = 1;
     if (cursor_pos > (VGA_ROWS * VGA_COLS)-1 || (c == '\n' && (cursor_pos / VGA_COLS)+1 >= VGA_COLS)) {
             tty_scroll_down(1);
     }
-    if (c == '\n') {
+
+    if (c == 0) {}
+    else if (c == '\n') {
         for (int i = 0; i <= cursor_pos%VGA_COLS; i++)
-            putc(' ');
-        putc(0);
+            code = code && putc(' ');
+        code = code && putc(0);
     }
-    else if (c == 0) {}
+    else if (c == '\b') {
+        cursor_pos--;
+        putc(' ');
+        cursor_pos--;
+    }
     else {
         VGA_put_char(c, color, cursor_pos);
         cursor_pos++;
     }
     VGA_set_cursor(cursor_pos);
+
+    return code;
 }
 
-void puts (const char* s) {
+int puts (const char* s) {
     while (*s != 0) {
-        putc(*s++);
+        int code = putc(*s++);
+        if (code < 1)
+            return code;
     }
+
+    return 1;
 }
 
 void tty_write(const char* data, size_t size) {
@@ -77,14 +96,10 @@ void tty_scroll_down (int amount) {
 }
 
 //INPUT
+uint8_t getkey() {
+    return queue_drop(&key_queue);
+}
+
 char getch () {
-    static char old_ch = 0;
-    char ch = get_ascii_char(get_keycode());
-    if (ch == old_ch) {
-        return 0;
-    }
-    else {
-        old_ch = ch;
-        return ch;
-    }
+    return get_ascii_char(getkey());
 }

@@ -12,8 +12,6 @@ extern "C" {
 
 int printf(const char* __restrict, ...);
 
-int putchar(int);
-
 #ifdef __cplusplus
 }
 #endif

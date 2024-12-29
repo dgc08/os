@@ -1,10 +1,17 @@
 #ifndef KEYBOARD_HARDWARE_H_
 #define KEYBOARD_HARDWARE_H_
 
-char get_keycode_blocking();
-char get_keycode();
+#include <lib.h>
+
+#include <lib/queue.h>
 
 #define KEYBOARD_PORT 0x60
+
+extern Queue key_queue;
+
+char get_keycode();
+
+bool check_key(uint8_t code);
 
 #define KEY_A 0x1E
 #define KEY_B 0x30
@@ -85,6 +92,8 @@ char get_keycode();
 #define KEY_TAB 0x0F
 #define KEY_UP 0x48
 
-char get_ascii_char(unsigned char key_code);
+#define KEY_SHIFT 0x2A
+#define KEY_ALT 0x38
+
 
 #endif // KEYBOARD_HARDWARE_H_
