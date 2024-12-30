@@ -7,6 +7,8 @@
 
 #include <stdlib.h>
 
+#define UNUSED(x) (void)(x)
+
 typedef struct {
     int x;
     int y;

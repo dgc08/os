@@ -12,6 +12,8 @@
 #include <lib.h>
 #include <lib/queue.h>
 
+#include <se-sh/se-target.h>
+
 void acpi_poweroff_qemu(void);
 void poweroff (void) {
     acpi_poweroff_qemu();
@@ -24,6 +26,9 @@ void kmain (void) {
     //dbbreak();
 
     set_keyboard_layout("de");
+
+    target_shell();
+    poweroff();
 
     while(1) {
         putc(getch());
