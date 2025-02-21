@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <stdint.h>
 
 #include "lib/queue.h"
@@ -14,6 +15,14 @@ static volatile int cursor_pos = 0;
 
 static uint8_t color = VGA_LIGHT_GRAY | VGA_BLACK << 4;
 
+int tty_fill_chars (size_t n) {
+    for (;n;n--) {
+        VGA_put_char(0, color, cursor_pos);
+        cursor_pos++;
+    }
+    return 1;
+}
+
 int putc (char c) {
     int code = 1;
     if (cursor_pos > (VGA_ROWS * VGA_COLS)-1 || (c == '\n' && (cursor_pos / VGA_COLS)+1 >= VGA_COLS)) {
@@ -23,8 +32,7 @@ int putc (char c) {
     if (c == 0) {}
     else if (c == '\n') {
         for (int i = 0; i <= cursor_pos%VGA_COLS; i++)
-            code = code && putc(' ');
-        code = code && putc(0);
+            code = code && tty_fill_chars(1);
     }
     else if (c == '\b') {
         cursor_pos--;
@@ -48,6 +56,38 @@ int puts (const char* s) {
     }
 
     return 1;
+}
+
+void tty_read(char* dest, size_t nbytes, int fd) {
+    if (fd == stdout) {
+        if (!dest)
+            return;
+        for (size_t i = 0; i<nbytes; i++) {
+            dest[i] = VGA_get_char(i).c;
+        }
+    }
+    else if (fd == stdin) {
+        size_t i = 0;
+        char ch = 0;
+        dest[0] = 0;
+        while (ch != '\n' && i < nbytes) {
+            if (ch)
+                putc(ch);
+
+            if (ch == '\b' && i > 0) {
+                i--;
+            }
+            else if (ch && dest) {
+                dest[i] = ch;
+                i++;
+            }
+            get_keycode();
+            ch = getch();
+        }
+
+        dest[i] = 0;
+        putc('\n');
+    }
 }
 
 void tty_write(const char* data, size_t size) {

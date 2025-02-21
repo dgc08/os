@@ -37,31 +37,17 @@ void target_newline () {
     putc('\n');
 }
 
-void target_sleep (uint32_t mills) {
-    UNUSED(mills);
-    kernel_panic(1, "sleep not implemented yet");
-}
+void target_sleep(uint32_t mills) {
+    uint32_t iterations = mills * 3900 * 100; // Adjust for your CPU's MHz frequency
 
-void get_input () {
-    size_t i = 0;
-    char ch = 0;
-    input_buffer[0] = 0;
-    while (ch != '\n') {
-        if (ch == '\b' && i > 0) {
-            putc(ch);
-            i--;
-        }
-        else if (ch) {
-            putc(ch);
-            input_buffer[i] = ch;
-            i++;
-        }
-        get_keycode();
-        ch = getch();
-    }
-
-    input_buffer[i] = 0;
-    putc('\n');
+    asm volatile (
+        "1: \n\t"               // Label for the loop
+        "dec %[count] \n\t"     // Decrement the counter
+        "jnz 1b \n\t"           // Jump back to label 1 if not zero
+        : [count] "+r" (iterations) // Input and output operand
+        : // No other inputs
+        : "cc" // Clobbers condition flags
+    );
 }
 
 int target_shell () {
@@ -70,7 +56,7 @@ int target_shell () {
         if (target_terminal.echo)
             printf("$ ");
 
-        get_input();
+        tty_read(input_buffer, 256, stdin);
 
         if (strlen(input_buffer) > 0) {
             int code = prompt(input_buffer);
@@ -92,24 +78,30 @@ int target_system(char* command) {
 void target_check_exit_condition() {}
 
 void *malloc(size_t) {
-    kernel_panic(144, "Unimplemented memory allocator");
+    puts("Error: Unimplemented memory allocator\n");
+    return 0;
 }
 void *realloc(void *, size_t){
-    kernel_panic(144, "Unimplemented memory allocator");
+    puts("Error: Unimplemented memory allocator\n");
+    return 0;
 }
 void free(void *){
-    kernel_panic(144, "Unimplemented memory allocator");
+    puts("Error: Unimplemented memory allocator\n");
 }
 
 size_t target_write_file(const char*, Container) {
-    kernel_panic(144, "Unimplemented file system");
+    puts("Error: Unimplemented file system\n");
+    return 0;
 }
 Container target_read_file(const char*) {
-    kernel_panic(144, "Unimplemented file system");
+    puts("Error: Unimplemented file system\n");
+    return (Container){0,0};
 }
 Container target_list_files() {
-    kernel_panic(144, "Unimplemented file system");
+    puts("Error: Unimplemented file system\n");
+    return (Container){0,0};
 }
 bool target_remove_file(const char*) {
-    kernel_panic(144, "Unimplemented file system");
+    puts("Error: Unimplemented file system\n");
+    return 0;
 }

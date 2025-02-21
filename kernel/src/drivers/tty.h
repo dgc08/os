@@ -6,8 +6,14 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#define stdin 0
+#define stdout 1
+
 int putc(char c);
 int puts(const char* s);
+
+void tty_read(char* dest, size_t nbytes, int fd);
+
 void tty_write(const char* data, size_t size);
 void tty_set_color_byte(const uint8_t new_color);
 
