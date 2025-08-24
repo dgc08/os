@@ -22,8 +22,7 @@ int putc (char c) {
 
     if (c == 0) {}
     else if (c == '\n') {
-        for (int i = 0; i <= cursor_pos%VGA_COLS; i++)
-            code = code && putc(' ');
+        cursor_pos += VGA_COLS-cursor_pos%VGA_COLS;
         code = code && putc(0);
     }
     else if (c == '\b') {
@@ -37,22 +36,31 @@ int putc (char c) {
     }
     VGA_set_cursor(cursor_pos);
 
-    return code;
+    if (code == 1) // no error
+        return c;
+    else
+        return -1;
 }
 
 int puts (const char* s) {
+    int code;
     while (*s != 0) {
-        int code = putc(*s++);
-        if (code < 1)
+        code = putc(*s++);
+        if (code < 0)
             return code;
     }
 
-    return 1;
+    return code;
 }
 
-void tty_write(const char* data, size_t size) {
-    for (size_t i = 0; i < size; i++)
-        putc(data[i]);
+int tty_write(const char* data, size_t size) {
+    int code;
+    for (size_t i = 0; i < size; i++) {
+        code = putc(data[i]);
+        if (code)
+            return code;
+    }
+    return code;
 }
 
 void tty_set_color_byte (uint8_t new_color) {

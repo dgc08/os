@@ -19,9 +19,18 @@ void poweroff (void) {
     hcf();
 }
 
+typedef struct {
+    u16 number : 12;
+    bool active : 1;
+    bool writeable : 1;
+    bool read_only : 1;
+    bool accessed : 1;
+} Entry;
 
 void kmain (void) {
     //dbbreak();
+
+    printf("%d\n", kmain);
 
     set_keyboard_layout("de");
 

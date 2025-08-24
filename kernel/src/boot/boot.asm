@@ -1,9 +1,9 @@
-global kboot32
+global _start32
 extern long_mode_start
 
 section .text
 bits 32
-kboot32:
+_start32:
     mov esp, stack_top
 
     call check_multiboot
@@ -19,7 +19,7 @@ kboot32:
     hlt
 
 check_multiboot:
-    cmp eax, 0x36d76289
+    cmp eax, 0x36d76289         ; a multiboot bootloader writes that magic number into ax
     jne .no_multiboot
     ret
 .no_multiboot:
@@ -72,19 +72,19 @@ setup_page_tables:
     mov ecx, 0 ; counter
 .loop:
 
-    mov eax, 0x200000 ; 2MiB
+    mov eax, 0x200000 ; 2MiB huge page
     mul ecx
     or eax, 0b10000011 ; present, writable, huge page
     mov [page_table_l2 + ecx * 8], eax
 
     inc ecx ; increment counter
-    cmp ecx, 512 ; checks if the whole table is mapped
-    jne .loop ; if not, continue
+    cmp ecx, 512 ; if exc == 512, the whole p2 table is mapped (ptables are 512 in size)
+    jne .loop
 
     ret
 
 enable_paging:
-    ; pass page table location to cpu
+    ; pass p4 page table location to cpu
     mov eax, page_table_l4
     mov cr3, eax
 

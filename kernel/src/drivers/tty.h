@@ -8,7 +8,9 @@
 
 int putc(char c);
 int puts(const char* s);
+int tty_write(const char* data, size_t length);
 void tty_set_color_byte(const uint8_t new_color);
+
 
 int tty_get_cursor_scalar();
 Vector2 tty_get_cursor_vector();

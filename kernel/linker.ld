@@ -2,7 +2,7 @@
 /* OUTPUT_FORMAT(elf64-x86-64) */
 
 /* We want the symbol kmain to be our entry point */
-ENTRY(kboot32)
+ENTRY(_start32)
 
 PHDRS
 {
@@ -52,6 +52,9 @@ SECTIONS
         *(.bss .bss.*)
         *(COMMON)
     } :data
+
+
+    _kernel_end = .;
 
     /* Discard .note.* and .eh_frame* since they may cause issues on some hosts. */
     /DISCARD/ : {
