@@ -1,64 +1,52 @@
-/* Tell the linker that we want an x86_64 ELF64 output file */
-/* OUTPUT_FORMAT(elf64-x86-64) */
+/*            Original file taken from Bran's Kernel Development */
+/*            tutorials: http://www.osdever.net/bkerndev/index.php. */
 
-/* We want the symbol kmain to be our entry point */
-ENTRY(_start32)
-
-PHDRS
-{
-    boot PT_LOAD;
-    text PT_LOAD;
-    rodata PT_LOAD;
-    data PT_LOAD;
-}
-
-/* Define sections and layout */
-SECTIONS
-{
+ENTRY(_start)
+SECTIONS {
     . = 1M;
 
-    .boot :
+    .mboot ALIGN (4K) : AT(ADDR(.mboot))
+
     {
-        /* ensure that the multiboot header is at the beginning */
-        *(.multiboot_header)
-        KEEP(*(.multiboot_header))
-    } :boot
-
-    . = ALIGN(CONSTANT(MAXPAGESIZE));
-
-    .text : {
-        *(.text .text.*)
-    } :text
-
-    /* Move to the next memory page for .rodata */
-    . = ALIGN(CONSTANT(MAXPAGESIZE));
-
-    .rodata : {
-        *(.rodata .rodata.*)
-    } :rodata
-
-    /* Move to the next memory page for .data */
-    . = ALIGN(CONSTANT(MAXPAGESIZE));
-
-    .data : {
-        *(.data .data.*)
-    } :data
-
-    /* NOTE: .bss needs to be the last thing mapped to :data, otherwise lots of */
-    /* unnecessary zeros will be written to the binary. */
-    /* If you need, for example, .init_array and .fini_array, those should be placed */
-    /* above this. */
-    .bss : {
-        *(.bss .bss.*)
-        *(COMMON)
-    } :data
-
-
-    _kernel_end = .;
-
-    /* Discard .note.* and .eh_frame* since they may cause issues on some hosts. */
-    /DISCARD/ : {
-        *(.eh_frame*)
-        *(.note .note.*)
+        *(.mboot)
     }
+
+    /* The higher-half kernel virtual address offset */
+    kernOffset = 0xFFFFFFFF80000000;
+    . += kernOffset; /* Add the offset so that all future lables are linked here */
+
+    /* Add a symbol that indicates the start address of the kernel. */
+    _kernel_start = .;
+    _kernel_start_phys = . - kernOffset;
+
+
+    .text ALIGN (4K) : AT (ADDR (.text) - kernOffset)
+    {
+        *(.text)
+        code = .; _code = .; __code = .;
+    }
+
+    .rodata ALIGN (4K) : AT (ADDR (.rodata) - kernOffset)
+    {
+        *(.rodata)
+        rodata = .; _rodata = .; __rodata = .;
+    }
+
+    .data ALIGN (4K) : AT (ADDR (.data) - kernOffset)
+    {
+        *(.data)
+        data = .; _data = .; __data = .;
+    }
+
+    .bss  ALIGN (4K): AT (ADDR (.bss) - kernOffset)
+    {
+        *(COMMON)
+        *(.bss)
+        bss = .; _bss = .; __bss = .;
+    }
+
+    /* Add a symbol that indicates the end address of the kernel. */
+    _kernel_end = .; /* The virtual end address of the kernel */
+    _kernel_end_phys = . - kernOffset; /* The Physical end address of the kernel */
+    end = .; _end = .; __end = .;
 }

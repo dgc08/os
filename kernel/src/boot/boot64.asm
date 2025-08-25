@@ -1,10 +1,10 @@
-section .text
+section .boot64_code
 bits 64
 
 global long_mode_start
 extern kmain
 
-section .text
+section .boot64_code
 bits 64
 
 long_mode_start:
@@ -16,5 +16,6 @@ long_mode_start:
     mov fs, ax
     mov gs, ax
 
-    call kmain
+    mov rax, kmain
+    call rax
     hlt
