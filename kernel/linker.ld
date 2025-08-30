@@ -45,6 +45,11 @@ SECTIONS {
         bss = .; _bss = .; __bss = .;
     }
 
+    /* .video ALIGN (4K) : AT (0xB8000) { */
+    /*     vga_buffer_higher_half = .; */
+    /*     . = . + 0x1000; */
+    /* } */
+
     /* Add a symbol that indicates the end address of the kernel. */
     _kernel_end = .; /* The virtual end address of the kernel */
     _kernel_end_phys = . - kernOffset; /* The Physical end address of the kernel */

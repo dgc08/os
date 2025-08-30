@@ -51,21 +51,12 @@ _start:
 
     ; If these first two checks fail, they will jump to error
 
-    ; Check that we are using multiboot
     call check_multiboot
-
-    ; Check that CPUID is supported
     call check_cpuid
 
+    call check_longmode
 
-    ; Check that longmode is supported
-    call check_longmode ; Note, if long mode is not supported, this will jump to entry 32
-
-
-    ; Initialize paging and enable long mode
     call initialize_paging
-
-    ; Enable paging
     call enable_paging
 
     ; We are now in compatibility mode
@@ -87,26 +78,26 @@ _start:
 ; Initializes longmode paging
 initialize_paging:
 
-    ; Map lower half of the PML4 (first entry, starting at 0x00)
-    mov eax, no_offset(paging_pdpt_low) ; Remember to use physical addresses here
+    ; Map lower half of the P4 (first entry, starting at 0x00)
+    mov eax, no_offset(paging_p3_low) ; Remember to use physical addresses here
     or eax, 0b11 ; Set flags in the lower 12 bits as present and read/write
-    mov [no_offset(paging_pml4)], eax
+    mov [no_offset(paging_p4)], eax
 
-    ; Map the 511th PML4 entry with the higher-half pdpt
-    mov eax, no_offset(paging_pdpt_high)
+    ; Map the 511th P4 entry with the higher-half p3
+    mov eax, no_offset(paging_p3_high)
     or eax, 0b11
-    mov [no_offset(paging_pml4) + 511 * 8], eax
+    mov [no_offset(paging_p4) + 511 * 8], eax
 
-    ; Map the higher half pdpt. We offset the page directory at 510 so that
+    ; Map the higher half p3. We offset the page directory at 510 so that
     ; the kernel is at the desired address
-    mov eax, no_offset(paging_pd)
+    mov eax, no_offset(paging_p2)
     or eax, 0b11
-    mov [no_offset(paging_pdpt_high) + 510 * 8], eax
+    mov [no_offset(paging_p3_high) + 510 * 8], eax
 
-    ; Identity map the lower half pdpt
-    mov eax, no_offset(paging_pd)
+    ; Identity map the lower half p3
+    mov eax, no_offset(paging_p2)
     or eax, 0b11
-    mov [no_offset(paging_pdpt_low)], eax
+    mov [no_offset(paging_p3_low)], eax
 
     ; Map the page tables
     mov eax, no_offset(paging_pts) ; The physical address of all page tables to map
@@ -116,14 +107,14 @@ initialize_paging:
     call map_pts ; Map the page tables
 
     ; Map the page directory to the page tables.
-    mov eax, no_offset(paging_pd) ; The physical address of the page directory to map
+    mov eax, no_offset(paging_p2) ; The physical address of the page directory to map
     mov ebx, 0b11 ; Each entry should have the present and read/write flags set
     mov ecx, 512 ; We are mapping 512 page directory entries
     mov edx, no_offset(paging_pts) ; The physical addresses of the page tables we are mapping into the page directory.
-    call map_pd ; Map the page directory
+    call map_p2 ; Map the page directory
 
-    ; Load the PML4 into the cr3 register
-    mov eax, no_offset(paging_pml4)
+    ; Load the P4 into the cr3 register
+    mov eax, no_offset(paging_p4)
     mov cr3, eax ; CR3 is a control register, and thus can only be accessed by a register-to-register mov
 
     ; Enable PAE
@@ -191,7 +182,7 @@ map_pts:
 ; EBX: The flags to apply to each page directory
 ; ECX: The number of entries to map
 ; EDX: The physical address of the page tables to map
-map_pd:
+map_p2:
 
     ; Clear all non-flag values in EBX
     ; So that we don't accidentally overwrite the address
@@ -246,6 +237,7 @@ load_gdt:
 ; jumps to error if we encounter an issue
 check_multiboot:
     cmp eax, 0x36d76289
+    mov al, "M"
     jne error
     ret
 
@@ -276,6 +268,7 @@ check_cpuid:
 
     ; If eax and ebx are the same, then CPUID does not exist
     xor eax, ebx
+    mov al, "C"
     jz error
     ret
 
@@ -314,6 +307,10 @@ entry32:
 
 ; Any other startup errors should hang here
 error:
+    mov dword [0xb8000], 0x4f524f45
+    mov dword [0xb8004], 0x4f3a4f52
+    mov dword [0xb8008], 0x4f204f20
+    mov byte  [0xb800a], al
     jmp $
 
 
@@ -336,7 +333,7 @@ entry64:
     ; Print something to screen
     mov [0xb8000], byte 'a'
     mov rax, kmain
-    call rax
+    jmp rax
     ; Loop forever
     jmp $
 
@@ -358,22 +355,22 @@ section .bss
 ; Make sure this section is aligned on a page boundary
 align 0x1000
 
-; We have a single pml4 (Page Map Level 4)
-paging_pml4:
+; We have a single p4 (Page Map Level 4)
+paging_p4:
     resb 0x1000 ; All paging structures take up 0x1000 (4096/a single page) of bytes
 
-; Two PDPTs (Page Directory Poitner Table). This is so we can map the physical address space to the higher half *and* identity map the lower half.
+; Two P3s (Page Directory Poitner Table). This is so we can map the physical address space to the higher half *and* identity map the lower half.
 ; This is so we can jump to long mode from protected mode before we can address the higher half.
-paging_pdpt_low:
+paging_p3_low:
     resb 0x1000
-paging_pdpt_high:
+paging_p3_high:
     resb 0x1000
 
 ; All of these following paging structures are used twice: once on the higher half and once on the lower half.
 ; There is also enough to address 1GB, which is much more than we need, but is a nice number that is easy to map (512 page tables)
 
 ; A single page directory
-paging_pd:
+paging_p2:
     resb 0x1000
 
 ; 512 page tables (8GB of address space)
@@ -386,17 +383,12 @@ paging_pts:
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; Multiboot saved info addresses
 mboot_saved_info:
     mboot_eax: resd 1
     mboot_ebx: resd 1
 
 ; The stack
 stack resb 1024 ; Reserve 1024 bytes of stack
-
-
-
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;

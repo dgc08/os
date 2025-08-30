@@ -77,6 +77,49 @@ int printf (const char* restrict format, ...) {
 				return -1;
 			}
 			written += len;
+		} else if (*format == 'u') {
+			format++;
+			int value = va_arg(parameters, unsigned int); // Retrieve the next argument as an integer
+			char buffer[12]; // Enough space to hold the largest 32-bit integer value as a string (+null terminator)
+			utoa(value, buffer, 16); // Convert the integer to a decimal string
+			size_t len = strlen(buffer); // Calculate the string length
+			if (maxrem < len) {
+				// TODO: Set errno to EOVERFLOW.
+				return -1;
+			}
+			if (!print(buffer, len)) {
+				return -1;
+			}
+			written += len;
+		} else if (*format == 'p') {
+			format++;
+			size_t value = va_arg(parameters, size_t); // Retrieve the next argument as an integer
+			char buffer1[9]; // u32 in hex (+null terminator)
+			char buffer2[9]; // u32 in hex (+null terminator)
+			utoa(value>>32, buffer1, 16); // Convert the higher parts of the pointer to a hex string
+			utoa(value & 0xFFFFFFFF, buffer2, 16); // Convert the lower parts of the pointer to a hex string
+
+			char buffer_whole[17];
+			int len1 = strlen(buffer1);
+			int len2 = strlen(buffer2);
+			for (int i = 0; i < 8-len1; i++) {
+				buffer_whole[i] = '0';
+			}
+			memcpy(buffer_whole+8-len1, buffer1, len1);
+			for (int i = 0; i < 8-len2; i++) {
+				buffer_whole[i+8] = '0';
+			}
+			memcpy(buffer_whole+16-len2, buffer2, len2);
+
+			size_t len = 17;
+			if (maxrem < len) {
+				// TODO: Set errno to EOVERFLOW.
+				return -1;
+			}
+			if (!print(buffer_whole, len)) {
+				return -1;
+			}
+			written += len;
 		} else {
 			format = format_begun_at;
 			size_t len = strlen(format);

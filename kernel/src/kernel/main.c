@@ -12,6 +12,8 @@
 #include <lib.h>
 #include <lib/queue.h>
 
+#include "memory.h"
+
 void acpi_poweroff_qemu(void);
 void poweroff (void) {
     acpi_poweroff_qemu();
@@ -27,10 +29,10 @@ typedef struct {
     bool accessed : 1;
 } Entry;
 
-void kmain (void) {
+_Noreturn void kmain (void) {
     //dbbreak();
 
-    printf("%d\n", kmain);
+    printf("%p %p %p", kernel_start, kernel_offset, kernel_start-kernel_offset);
 
     set_keyboard_layout("de");
 
